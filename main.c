@@ -40,7 +40,7 @@ int compareWords(char* word1, char* word2) {/* zwraca 0 jesli wyrazy sa takie sa
         return -1;
     }
 
-    if(strlen(word1) > strlen(word2)) {
+    if(strlen(word1) < strlen(word2)) {
         length = strlen(word2);
     }
     else {
@@ -100,9 +100,9 @@ struct node* countFile(char* fileName) {
   return head;
 }
 
-void displayList(struct node* pointer) {
-    while(pointer != NULL) {
-        printf("Slowo: %s, ilosc: %d \n", pointer->word,pointer->repetition);
+void displayList(struct node* pointer) { /* pomija wartownika, 1wszy node */
+    while(pointer->next != NULL) {
+        printf("Slowo: %s, ilosc: %d \n", pointer->next->word,pointer->next->repetition);
         pointer = pointer->next;
     }
 }
