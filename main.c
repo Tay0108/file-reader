@@ -1,12 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 /* jedna lista, alfabetyczna */
 struct node {
   char* word;
   int repetition;
   struct node* next;
 };
+
+struct sum {
+    int sumAll;
+    int sumUnique;
+};
+
 void trim(char* word) { /* funkcja obcina stringa ze znakow specjalnych, np *()slowo lub slowo, zamienia na slowo */
   int i,j;
   int wordLength;
@@ -107,19 +114,42 @@ void displayList(struct node* pointer) { /* pomija wartownika, 1wszy node */
     }
 }
 
-int wordsCount() { /* zwraca liczbe wszystkich oraz roznych wyrazow */
-  return 0;
+struct sum wordsCount(struct node* pointer) { /* zwraca liczbe wszystkich oraz roznych wyrazow */
+    struct sum wordsSum;
+    wordsSum.sumAll = 0;
+    wordsSum.sumUnique = 0;
+    while(pointer->next != NULL) {
+        wordsSum.sumAll += pointer->next->repetition;
+        ++wordsSum.sumUnique;
+        pointer = pointer->next;
+    }
+  return wordsSum;
 }
 
-void longestWord() { /* znajduje najdluzsze slowo */
-  /*return;*/
+char* longestWord(struct node* pointer) { /* znajduje najdluzsze slowo */
+    char tmp[1] = {'\0'}; /* brzydki cheat, zeby nie wyrzucalo bledu jak liczy strlen z NULLa */
+    char* longest = tmp;
+    while(pointer->next != NULL) {
+        if(strlen(longest) < strlen(pointer->next->word)) {
+            longest = pointer->next->word;
+        }
+    pointer = pointer->next;
+    }
+  return longest;
 }
 
 int main(void) {
 
     struct node* head;
+    struct sum wordsSum;
+    char* longest;
 
     head = countFile("file.txt");
     displayList(head);
+    wordsSum = wordsCount(head);
+    longest = longestWord(head);
+    printf("Liczba wszystkich wyrazow: %d\n", wordsSum.sumAll);
+    printf("Liczba unikalnych wyrazow: %d\n", wordsSum.sumUnique);
+    printf("Najdluzsze slowo: %s (%d liter)", longest, strlen(longest));
     return 0;
 }
