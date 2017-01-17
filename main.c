@@ -34,8 +34,12 @@ void lowercase(char* word) { /* przepisuje slowo w buforze na male litery */
     }
 }
 
-int compareWords(char* word1, char* word2) {/* zwraca 0 jesli wyrazy sa takie same, 1 jesli 1wszy jest wczesniejszy, 2 jesli 2gi. */
+int compareWords(char* word1, char* word2) {/* zwraca 0 jesli wyrazy sa takie same, 1 jesli 1wszy jest wczesniejszy, 2 jesli 2gi. -1 jesli ktorys jest nullem*/
     int length,i;
+    if(word1 == NULL || word2 == NULL) {
+        return -1;
+    }
+
     if(strlen(word1) > strlen(word2)) {
         length = strlen(word2);
     }
@@ -58,7 +62,6 @@ struct node* countFile(char* fileName) {
     char* word;
     FILE* fileHandle;
     int wordLength;
-    int flag = 1;
     struct node* newNode;
     struct node* listPointer; /* wskaznik do chodzenia po liscie i dodawania node'ow w odpowiednim miejscu */
     /* tworzenie listy z wyrazami */
@@ -70,45 +73,37 @@ struct node* countFile(char* fileName) {
     newNode->next = head;
     head = newNode;
 
-  fileHandle = fopen(fileName, "rt"); /* rt - reading text */
-  while(fscanf(fileHandle, "%s", buffer) != EOF) {
-    listPointer = head; /* reset wskaznika do chodzenia po liscie na poczatku kazdej petli */
-    trim(buffer);
-    lowercase(buffer);
-    wordLength = strlen(buffer);
-    word  = (char*)malloc(wordLength*sizeof(char)); /*  alokacja pamieci */
-    word = buffer; /* przepisanie z bufora na styrte */
-    /* gdzies tu sprawdzanie, czy wyraz juz istnieje na liscie */
-    /* lece po liscie i sprawdzam gdzie wstawic zeby byla kolejnosc alfabetyczna  tu jest problem bo np na poczatku to zawsze bedzie falszywe*/
-    while(flag) { /* do napisania od nowa */
-        if(compareWords(word, listPointer->next->word) == 2 && listPointer->next != NULL) { /* przesuwa, jesli aktualne slowo ma byc umieszczone dalej */
+    fileHandle = fopen(fileName, "rt"); /* rt - reading text */
+    while(fscanf(fileHandle, "%s", buffer) != EOF) {
+        listPointer = head; /* reset wskaznika do chodzenia po liscie na poczatku kazdej petli */
+        trim(buffer);
+        lowercase(buffer);
+        while(listPointer->next != NULL && compareWords(buffer, listPointer->next->word) == 2) {
             listPointer = listPointer->next;
         }
-        else if(compareWords(word, listPointer->next->word) == 0) { /* slowa sa identyczne */
+        if(listPointer->next != NULL && compareWords(buffer, listPointer->next->word) == 0) {
             ++listPointer->next->repetition;
-            flag = 0;
         }
-        else { /* w przeciwnym wypadku tworzymy nowy node na slowo */
+        else {
+            wordLength = strlen(buffer);
+            word  = (char*)malloc(wordLength*sizeof(char)); /*  alokacja pamieci */
+            strcpy(word,buffer); /* przepisanie z bufora na styrte */
+
             newNode = (struct node*)malloc(sizeof(struct node));
             newNode->word = word;
             newNode->repetition = 1;
             newNode->next = listPointer->next;
             listPointer->next = newNode;
-            flag = 0;
         }
     }
-    /* Jesli juz jest, to repetition+1 */
     /* Jesli takiego wyrazu jeszcze nie ma na liscie: */
-
-  }
-  /* czytaj plik po wyrazie i pakuj wyraz do bufora. */
   return head;
 }
 
 void displayList(struct node* pointer) {
     while(pointer != NULL) {
-    printf("Slowo: %s, ilosc: %d", pointer->word,pointer->repetition);
-    pointer = pointer->next;
+        printf("Slowo: %s, ilosc: %d \n", pointer->word,pointer->repetition);
+        pointer = pointer->next;
     }
 }
 
